@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Fancy media player in Javascript</title>
+    <link href="public/style.css" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src=
+    "http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js"></script><!-- for SHA1 -->
+
+    <script src="public/mediaplayer.js"></script>
+</head>
+
+<body>
+    <div id="loginScreen">
+        <fieldset>
+            <legend>Login</legend>
+
+            <p>Username: <input id="username" type="text"> Password: <input id=
+            "password" type="password"> <input id="btnLogin" type="submit"
+            value="Login"></p>
+        </fieldset>
+    </div>
+
+    <div id="playList">
+        <p>This is the initial page content.<br>
+        The actual content will be loaded in <span id="initInterval"></span>
+        seconds.</p>
+    </div>
+
+    <div id="playerView" style="visibility:hidden;">
+        <audio id="player"></audio> <button id="btnPlay">Play</button>
+        <button id="btnPause">Pause</button> <button id=
+        "btnStop">Stop</button><br>
+        <button id="btnVolDown">Vol--</button> <button id=
+        "btnVolUp">Vol++</button>
+    </div>
+
+<script>
+    var hash = CryptoJS.SHA1(document.getElementById('password').value);
+    console.log("hash", hash.toString());
+    window.onload = function() {
+        // Create mediaplayer object
+        myPlayer = new Mediaplayer();
+
+        var jqxhr = $.get("api/", function(data) {
+                        // Use JSON.stringify(data) if you need to convert JS object to a string
+            console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
+            var played= data.playlist;
+            selectedsong = function (songId) {
+            player.src = played[songId];
+            player.play();
+            }
+            var temp = [];
+            var songs = '<table><tr><th>#</th><th>Song</th><th>Duration</th></tr>'
+            for (var song in played) {
+                var audio = new Audio();
+                audio.src = played[song];
+                audio.songId = song;
+                songs += '<tr class="selectable"><td><b>' + song + '</b></td><td onclick="selectedsong(\'' + song + '\')"">' + played[song] + '</td><td id="song' + song + '"></td></tr>';
+                audio.addEventListener('loadedmetadata', function() {
+                    // Say something about the EventListener scope
+                    var duration = this.duration;
+                    document.getElementById('song' + this.songId).innerHTML = duration.toHHMMSS();
+                    console.log("loadedmetadata:", duration.toHHMMSS());
+                });
+                audio.addEventListener('loadstart', function() {
+                    //console.log("loadstart", this.src);
+                });
+                audio.addEventListener('suspend', function() {
+                    //console.log("loadstart", this.src);
+                });
+                audio.addEventListener('progress', function() {
+                    //console.log("progress", this.src);
+                });
+                /*
+                audio.addEventListener('canplay', function() {
+                console.log("playable");
+                document.getElementById('canplay'+this.songId).innerHTML = "X";
+                });
+                */
+                //console.log("Adding song:", playlist[song].title + " by " + playlist[song].artist);
+            }
+            songs += '</table>';
+            player.src = played[0];
+            document.getElementById('playList').innerHTML = songs;
+            document.getElementById('playerView').style.visibility = "visible";
+        });
+        jqxhr;
+
+         /* Login submit function */
+        $("#btnLogin").click(function(){
+            var username = document.getElementById('username').value;
+            var password = CryptoJS.SHA1(document.getElementById('password').value).toString();
+
+            $.post("api/login",
+                    {username: username,
+                    password: password},
+                    function(data,status, jqXHR){
+                        // TODO: show personal playlist after successful login
+                        var login  = data.login;
+                        if(login == 'ok') {
+                            console.log("login ok")
+                            console.log("Data: " + JSON.stringify(data) + "\nStatus: " + status);
+                            var played= data.playlist;
+                            selectedsong = function (songId) {
+                            player.src = played[songId];
+                            player.play();
+                            }
+                            var temp = [];
+                            var songs = '<table><tr><th>#</th><th>Song</th><th>Duration</th></tr>'
+                            for (var song in played) {
+                                var audio = new Audio();
+                                audio.src = played[song];
+                                audio.songId = song;
+                                songs += '<tr class="selectable"><td><b>' + song + '</b></td><td onclick="selectedsong(\'' + song + '\')"">' + played[song] + '</td><td id="song' + song + '"></td></tr>';
+                                audio.addEventListener('loadedmetadata', function() {
+                                    // Say something about the EventListener scope
+                                    var duration = this.duration;
+                                    document.getElementById('song' + this.songId).innerHTML = duration.toHHMMSS();
+                                    console.log("loadedmetadata:", duration.toHHMMSS());
+                                });
+                                audio.addEventListener('loadstart', function() {
+                                    //console.log("loadstart", this.src);
+                                });
+                                audio.addEventListener('suspend', function() {
+                                    //console.log("loadstart", this.src);
+                                });
+                                audio.addEventListener('progress', function() {
+                                    //console.log("progress", this.src);
+                                });
+                                /*
+                                audio.addEventListener('canplay', function() {
+                                console.log("playable");
+                                document.getElementById('canplay'+this.songId).innerHTML = "X";
+                                });
+                                */
+                                //console.log("Adding song:", playlist[song].title + " by " + playlist[song].artist);
+                            }
+                            songs += '</table>';
+                            player.src = played[0];
+                            document.getElementById('playList').innerHTML = songs;
+                            document.getElementById('playerView').style.visibility = "visible";
+                        }
+                    }, "json");
+        });
+    };
+</script>
+</body>
+</html>

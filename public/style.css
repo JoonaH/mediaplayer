@@ -1,0 +1,32 @@
+
+/* CSS-kielen kommentti alkaa tämän rivin kahdella ensimmäisellä merkillä
+ja päättyy tämän rivin kahteen viimeiseen merkkiin */
+
+#initInterval {
+	color:red;
+	font-weight:bold;
+}
+
+td {
+	border: 1px solid;
+	padding: 3px;
+}
+
+th {
+	border: 1px solid;
+	padding: 3px;
+	background-color: #808080;
+}
+
+.selectable:hover {
+	color: white;
+	background-color: rgb(10, 10, 10);
+}
+
+tr:nth-child(even) {
+	background: #aaaaaa;
+}
+
+tr:nth-child(odd) {
+	background: #eeeeee;
+}
