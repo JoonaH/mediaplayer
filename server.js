@@ -80,29 +80,19 @@ router.post('/api/login', function(req, res) {
   var connection = mysql.createConnection(conn);
 
   connection.connect();
-  connection.query('SELECT * FROM kayttaja WHERE kayttaja_nimi = "' + username + '" AND salasana = "' + password + '"', function(err, rows, fields) {
+  connection.query('SELECT linkki FROM biisi INNER JOIN soittolista ON bid = soittolista.b_id AND soittolista.k_id = (SELECT kid FROM kayttaja WHERE kayttaja_nimi = "'+ username +'" AND salasana = "' + password + '");', function(err, rows, fields) {
+  if (err) {
+    console.log(err);
+    throw err;
+  } 
   if(rows[0] !== undefined){
-  if(rows[0].salasana === password && rows[0].kayttaja_nimi === username) {
-    connection.query('SELECT * FROM soittolista WHERE k_nimi = "' + req.body.username + '"', function(err, rows, fields) {
-      var dbresp = [];
-      for(var solution in rows) {
-      connection.query('SELECT * FROM biisi WHERE id = "' + rows[solution].b_id + '"', function(err, rows, fields) {
-      console.log("rows:", rows);
-      if (err) {
-        console.log(err);
-        throw err;
-      }
-        dbresp[solution] = rows[solution].linkki;
-      });
-      }
-      console.log("dbresp:", dbresp);
-      res.json({login: 'ok', playlist: dbresp});
-      //res.json({login: 'ok', playlist: [{title: "Kesämopo", artist: "Sleepy Sleepers"}, {title: "Africa", artist: "Toto"}]});
-    });
-  }
-  else {
-    res.json({login: 'failed'});
-  }
+    console.log(rows);
+    var dbresp = [];
+    for(var solution in rows) {
+      dbresp[solution] = rows[solution].linkki;
+    }
+    res.json({login: 'ok', playlist: dbresp});
+    //res.json({login: 'ok', playlist: [{title: "Kesämopo", artist: "Sleepy Sleepers"}, {title: "Africa", artist: "Toto"}]});
   }
   else {
     res.json({login: 'failed'});

@@ -144,6 +144,10 @@
                             document.getElementById('playList').innerHTML = songs;
                             document.getElementById('playerView').style.visibility = "visible";
                         }
+                        else{
+                            document.getElementById('playList').innerHTML = "Virheellinen kirjautuminen";
+                            document.getElementById('playerView').style.visibility = "visible";
+                        }
                     }, "json");
         });
     };
